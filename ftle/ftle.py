@@ -28,8 +28,12 @@ class FTLE:
     def time_to_T(self):
         """
         Converts integration time to seconds.
-        """
         
+        Returns:
+            - T(float): Integration time (seconds)
+        """
+        T = (ds.time[self.time] - ds.time[0]).values.astype('timedelta64[s]').astype('float64')
+        return T
 
     def get_ftle(self):
         """
