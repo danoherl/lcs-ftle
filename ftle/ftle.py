@@ -1,4 +1,3 @@
-# Class to create FTLE field.
 """
 Ideas from:
 Shadden, Shawn & Lekien, Francois & Marsden, Jerrold. (2005).
@@ -6,8 +5,10 @@ Shadden, Shawn & Lekien, Francois & Marsden, Jerrold. (2005).
             finit-time Lyapunov exponents in two-dimensional aperiodic flows.
             Physica D. 212. 271-304. 10.1016/j.physd.2005.10.007.
 """
+import numpy as np
+import xarray as xr
 
-# Functions included:
+
 class FTLE:
     """
     Class to undertake Finite Time Lyapunov Exponent analysis.
@@ -28,17 +29,35 @@ class FTLE:
     def time_to_T(self):
         """
         Converts integration time to seconds.
+        Also obtains timeindex, from which to index x and y values for Jacobian.
         
         Returns:
             - T(float): Integration time (seconds)
         """
-        T = (ds.time[self.time] - ds.time[0]).values.astype('timedelta64[s]').astype('float64')
+        T = (ds.time[self.time] - ds.time[0]).dt.total_seconds().values
         return T
 
     def get_ftle(self):
         """
-        Calculates a 2D FTLE field. 
+        Calculates a 2D FTLE field in cartesian coordinates (x,y)
         """
-        
+        t_idx = self.time
+        T = self.get_integration_time()
+        x_T = ds.x.isel(time=t_idx).squeeze().values
+        y_T = ds.y.isel(time=t_idx).squeeze().values
+        dy = ds.y0.values
+        dx = ds.x0.values
+        dxdy, dxdx = np.gradient(x_T, dy, dx)        
+        dydy, dydx = np.gradient(y_T, dy, dx)
+        ny, nx = dxdy.shape
+        ftle = xr.zeros_like(dxdy)
+        for i in range(0, ny):
+            for j in range(0, nx):
+                J = np.array([[dxdx[i, j], dxdy[i, j]],
+                              [dydx[i, j], dydy[i, j]]])
+                M = np.dot(np.transpose(J), J)
+                evalues_lya, _ = np.linalg.eigvalsh(M)
+                ftle[i, j] = (1./np.abs(T))*np.log(np.sqrt(evalues_lya.max()))
+        return ftle
 
 
