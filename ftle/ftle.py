@@ -42,7 +42,7 @@ class FTLE:
         Calculates a 2D FTLE field in cartesian coordinates (x,y)
         """
         t_idx = self.time
-        T = self.get_integration_time()
+        T = self.time_to_T()
         x_T = ds.x.isel(time=t_idx).squeeze().values
         y_T = ds.y.isel(time=t_idx).squeeze().values
         dy = ds.y0.values
