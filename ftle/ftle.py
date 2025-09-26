@@ -34,7 +34,7 @@ class FTLE:
         Returns:
             - T(float): Integration time (seconds)
         """
-        T = (ds.time[self.time] - ds.time[0]).dt.total_seconds().values
+        T = (ds.time[self.time] - ds.time[0]).dt.total_seconds().to_numpy()
         return T
 
     def get_ftle(self):
@@ -43,10 +43,10 @@ class FTLE:
         """
         t_idx = self.time
         T = self.time_to_T()
-        x_T = ds.x.isel(time=t_idx).squeeze().values
-        y_T = ds.y.isel(time=t_idx).squeeze().values
-        dy = ds.y0.values
-        dx = ds.x0.values
+        x_T = ds.x.isel(time=t_idx).squeeze().to_numpy()
+        y_T = ds.y.isel(time=t_idx).squeeze().to_numpy()
+        dy = ds.y0.to_numpy()
+        dx = ds.x0.to_numpy()
         dxdy, dxdx = np.gradient(x_T, dy, dx)        
         dydy, dydx = np.gradient(y_T, dy, dx)
         ny, nx = dxdy.shape
@@ -60,4 +60,5 @@ class FTLE:
                 ftle[i, j] = (1./np.abs(T))*np.log(np.sqrt(evalues_lya.max()))
         return ftle
 
-
+    
+        
