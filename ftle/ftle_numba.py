@@ -7,7 +7,7 @@ to machine code.
 
 
 import numpy as np
-from numba as njit, float32, prange
+from numba import njit, float32, prange
 
 
         
